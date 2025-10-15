@@ -296,12 +296,12 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 
 [[package]]
 name = "linesweeper"
-version = "0.0.4"
-source = "git+https://github.com/jneem/linesweeper?rev=c8c1d089e472bded26dbfde0146f7b346908e943#c8c1d089e472bded26dbfde0146f7b346908e943"
+version = "0.1.0"
+source = "git+https://github.com/jneem/linesweeper?rev=b8011286d8cb992c501eefc32bdf5351670afd4d#b8011286d8cb992c501eefc32bdf5351670afd4d"
 dependencies = [
  "arrayvec",
  "kurbo",
- "poly-cool",
+ "polycool",
 ]
 
 [[package]]
@@ -366,10 +366,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6"
 
 [[package]]
-name = "poly-cool"
-version = "0.3.2"
+name = "polycool"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8370a553db72b99cd797d84e98f4f3a43bc7b57a3d9f0c9f095cbb24683694c1"
+checksum = "70e7383348ab3cd2b26ec9454d2571b7c750f697cd615b4d9f79f505e699dacc"
 dependencies = [
  "arrayvec",
 ]
