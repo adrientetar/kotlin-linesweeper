@@ -278,9 +278,9 @@ dependencies = [
 
 [[package]]
 name = "kurbo"
-version = "0.11.3"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c62026ae44756f8a599ba21140f350303d4f08dcdcc71b5ad9c9bb8128c13c62"
+checksum = "ce9729cc38c18d86123ab736fd2e7151763ba226ac2490ec092d1dd148825e32"
 dependencies = [
  "arrayvec",
  "euclid",
@@ -297,7 +297,7 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 [[package]]
 name = "linesweeper"
 version = "0.1.0"
-source = "git+https://github.com/jneem/linesweeper?rev=b8011286d8cb992c501eefc32bdf5351670afd4d#b8011286d8cb992c501eefc32bdf5351670afd4d"
+source = "git+https://github.com/jneem/linesweeper?rev=5b5592d60b304924fb11d1dc1e5f5bed0a68c2aa#5b5592d60b304924fb11d1dc1e5f5bed0a68c2aa"
 dependencies = [
  "arrayvec",
  "kurbo",
@@ -367,9 +367,9 @@ checksum = "b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6"
 
 [[package]]
 name = "polycool"
-version = "0.3.3"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70e7383348ab3cd2b26ec9454d2571b7c750f697cd615b4d9f79f505e699dacc"
+checksum = "50596ddc09eb5ad5f75cacd40209568e66df71baf86e1499a0e99c4cff12a5a6"
 dependencies = [
  "arrayvec",
 ]
