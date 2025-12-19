@@ -16,7 +16,7 @@ path = "uniffi-bindgen.rs"
 
 [dependencies]
 uniffi = { version = "0.29.4", features = ["cli"] }
-linesweeper = { git = "https://github.com/jneem/linesweeper", rev = "5b5592d60b304924fb11d1dc1e5f5bed0a68c2aa" }
+linesweeper = { git = "https://github.com/jneem/linesweeper", rev = "7d620ed004605141519037c681edac93e22f5855" }
 kurbo = "0.12"
 thiserror = "1.0"
 

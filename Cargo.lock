@@ -297,7 +297,7 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 [[package]]
 name = "linesweeper"
 version = "0.1.0"
-source = "git+https://github.com/jneem/linesweeper?rev=5b5592d60b304924fb11d1dc1e5f5bed0a68c2aa#5b5592d60b304924fb11d1dc1e5f5bed0a68c2aa"
+source = "git+https://github.com/jneem/linesweeper?rev=7d620ed004605141519037c681edac93e22f5855#7d620ed004605141519037c681edac93e22f5855"
 dependencies = [
  "arrayvec",
  "kurbo",
