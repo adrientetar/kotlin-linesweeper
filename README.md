@@ -23,8 +23,26 @@ repositories {
     mavenCentral()
 }
 
+val linesweeperVersion = "1.0.0"
+val linesweeperTarget = run {
+    val osName = System.getProperty("os.name").lowercase()
+    val archName = System.getProperty("os.arch").lowercase()
+
+    val os = when {
+        "mac" in osName || "darwin" in osName -> "macos"
+        "windows" in osName -> "windows"
+        else -> "linux"
+    }
+    val arch = when (archName) {
+        "aarch64", "arm64" -> "arm64"
+        else -> "x64"
+    }
+    "$os-$arch"
+}
+
 dependencies {
-    implementation("io.github.adrientetar:kotlin-linesweeper:1.0.0")
+    implementation("io.github.adrientetar:kotlin-linesweeper:$linesweeperVersion")
+    runtimeOnly("io.github.adrientetar:kotlin-linesweeper:$linesweeperVersion:$linesweeperTarget")
 }
 ```
 
@@ -77,7 +95,7 @@ Development
 
 To build this library, you need:
 
-- [Rust](https://rustup.rs/) (latest stable version)
+- [Rust](https://rustup.rs/) (latest stable version) with the `cargo` build tool in your PATH
 - JDK 11 or higher
 
 ```bash

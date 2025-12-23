@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version libs.versions.kotlin
+    alias(libs.plugins.kotlin.jvm)
     id("java-library")
-    id("com.vanniktech.maven.publish") version libs.versions.mavenPublish
+    alias(libs.plugins.maven.publish)
 }
 
 val GROUP: String by project
@@ -24,20 +24,64 @@ kotlin {
 }
 
 dependencies {
-    implementation("net.java.dev.jna:jna:" + libs.versions.jna.get())
+    implementation(libs.jna)
 
     testImplementation(kotlin("test"))
-    testImplementation("com.google.truth:truth:" + libs.versions.truth.get())
+    testImplementation(libs.truth)
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
+// Platform detection
+val osName = providers.systemProperty("os.name").map { it.lowercase() }
+val osArch = providers.systemProperty("os.arch").map { it.lowercase() }
+
+val currentOs = osName.map { name ->
+    when {
+        name.contains("mac") || name.contains("darwin") -> "macos"
+        name.contains("windows") -> "windows"
+        else -> "linux"
+    }
+}
+
+val currentArch = osArch.map { arch ->
+    when {
+        arch == "aarch64" || arch == "arm64" -> "arm64"
+        else -> "x64"
+    }
+}
+
+val platformClassifier = providers.zip(currentOs, currentArch) { os, arch -> "$os-$arch" }
+
+val nativeLibName = currentOs.map { os ->
+    when (os) {
+        "windows" -> "kotlin_linesweeper.dll"
+        "macos" -> "libkotlin_linesweeper.dylib"
+        else -> "libkotlin_linesweeper.so"
+    }
+}
+
+val nativeLibExtension = currentOs.map { os ->
+    when (os) {
+        "windows" -> "dll"
+        "macos" -> "dylib"
+        else -> "so"
+    }
+}
+
+// Directory for platform-specific native library
+val nativeLibDir = layout.buildDirectory.dir(platformClassifier.map { "native/$it" })
+
+// Cargo - resolve from PATH (optionally override via CARGO_PATH)
+val cargoPath = providers.environmentVariable("CARGO_PATH").orElse("cargo")
+
 // Custom tasks for building Rust library and generating Kotlin bindings
 tasks.register<Exec>("buildRustLibrary") {
     description = "Build the Rust library"
-    commandLine("cargo", "build", "--release")
+    executable = cargoPath.get()
+    args("build", "--release")
     workingDir = projectDir
 }
 
@@ -52,10 +96,13 @@ tasks.register<Exec>("generateKotlinBindings") {
         outputDir.mkdirs()
     }
 
+    val libPath = "target/release/${nativeLibName.get()}"
     commandLine(
-        "cargo", "run", "--features=uniffi/cli", "--bin", "uniffi-bindgen", "generate",
-        "--library", "target/release/libkotlin_linesweeper.dylib",
+        cargoPath.get(), "run",
+        "--features=uniffi/cli", "--bin", "uniffi-bindgen", "generate",
+        "--library", libPath,
         "--language", "kotlin",
+        "--no-format",
         "--config", "uniffi.toml",
         "--out-dir", "bindings"
     )
@@ -63,17 +110,11 @@ tasks.register<Exec>("generateKotlinBindings") {
 }
 
 tasks.register<Copy>("copyNativeLibrary") {
-    description = "Copy the built native library to resources"
+    description = "Copy the built native library to platform-specific directory"
     dependsOn("buildRustLibrary")
 
-    val libName = when {
-        System.getProperty("os.name").lowercase().contains("windows") -> "kotlin_linesweeper.dll"
-        System.getProperty("os.name").lowercase().contains("mac") -> "libkotlin_linesweeper.dylib"
-        else -> "libkotlin_linesweeper.so"
-    }
-
-    from("target/release/$libName")
-    into("src/main/resources")
+    from({ "target/release/${nativeLibName.get()}" })
+    into(nativeLibDir)
 }
 
 tasks.register("prepareKotlin") {
@@ -85,21 +126,76 @@ tasks.named("compileKotlin") {
     dependsOn("prepareKotlin")
 }
 
-tasks.named("processResources") {
-    dependsOn("copyNativeLibrary")
+tasks.named("compileTestKotlin") {
+    dependsOn("prepareKotlin")
 }
 
-// Configure JAR to include native libraries
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from("src/main/resources") {
-        include("*.so", "*.dll", "*.dylib")
+// For tests, we need the native library in a location JNA can find
+tasks.register<Copy>("copyNativeLibraryForTest") {
+    description = "Copy native library to resources for testing"
+    dependsOn("buildRustLibrary")
+    from({ "target/release/${nativeLibName.get()}" })
+    into(layout.buildDirectory.dir("resources/main"))
+}
+
+tasks.named("processResources") {
+    dependsOn("copyNativeLibraryForTest")
+}
+
+tasks.test {
+    dependsOn("copyNativeLibraryForTest")
+}
+
+tasks.withType<Jar>().configureEach {
+    if (name == "sourcesJar") {
+        dependsOn("generateKotlinBindings")
     }
 }
 
-afterEvaluate {
-    tasks.named("sourcesJar") {
-        dependsOn("generateKotlinBindings", "copyNativeLibrary")
+// Base JAR with only Kotlin code (no native libraries)
+tasks.jar {
+    archiveClassifier.set("")
+    exclude("**/*.so", "**/*.dll", "**/*.dylib")
+}
+
+// Platform-specific JAR containing only the native library
+val nativeJar by tasks.registering(Jar::class) {
+    dependsOn("copyNativeLibrary")
+    archiveClassifier.set(platformClassifier)
+    from(nativeLibDir) {
+        include("*.${nativeLibExtension.get()}")
+    }
+}
+
+// Platform-specific native JARs (used by CI publish job when multiple native libs are present)
+val allNativeClassifiers = listOf(
+    "macos-arm64",
+    "macos-x64",
+    "linux-x64",
+    "linux-arm64",
+    "windows-x64",
+    "windows-arm64",
+)
+
+val nativeJarsByClassifier: Map<String, TaskProvider<Jar>> = allNativeClassifiers.associateWith { classifier ->
+    tasks.register<Jar>("nativeJar_${classifier.replace('-', '_')}") {
+        archiveClassifier.set(classifier)
+        val dir = layout.buildDirectory.dir("native/$classifier")
+        from(dir)
+        // Only publish if the files exist (local dev builds only one)
+        onlyIf { dir.get().asFile.exists() && (dir.get().asFile.listFiles()?.isNotEmpty() == true) }
+    }
+}
+
+tasks.named("build") {
+    dependsOn(nativeJar)
+}
+
+// Hook into vanniktech maven-publish to add native JARs as additional artifacts
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        artifact(nativeJar)
+        nativeJarsByClassifier.values.forEach { artifact(it) }
     }
 }
 

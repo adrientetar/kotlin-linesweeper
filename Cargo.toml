@@ -3,7 +3,7 @@ name = "kotlin-linesweeper"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "Kotlin bindings for the linesweeper Rust library - boolean operations on closed Bezier paths"
+description = "Kotlin bindings for linesweeper, a robust Bézier boolean ops library"
 repository = "https://github.com/user/kotlin-linesweeper"
 
 [lib]
