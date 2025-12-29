@@ -168,6 +168,7 @@ val nativeJar by tasks.registering(Jar::class) {
 }
 
 // Platform-specific native JARs (used by CI publish job when multiple native libs are present)
+val currentNativeClassifier = platformClassifier.get()
 val allNativeClassifiers = listOf(
     "macos-arm64",
     "macos-x64",
@@ -177,7 +178,11 @@ val allNativeClassifiers = listOf(
     "windows-arm64",
 )
 
-val nativeJarsByClassifier: Map<String, TaskProvider<Jar>> = allNativeClassifiers.associateWith { classifier ->
+val nativeJarsByClassifier: Map<String, TaskProvider<Jar>> =
+    allNativeClassifiers
+        // The current platform is already covered by `nativeJar`.
+        .filter { it != currentNativeClassifier }
+        .associateWith { classifier ->
     tasks.register<Jar>("nativeJar_${classifier.replace('-', '_')}") {
         archiveClassifier.set(classifier)
         val dir = layout.buildDirectory.dir("native/$classifier")
@@ -195,11 +200,17 @@ tasks.named("build") {
 publishing {
     publications.withType<MavenPublication>().configureEach {
         artifact(nativeJar)
-        nativeJarsByClassifier.values.forEach { artifact(it) }
+        // Only publish additional platform artifacts when CI has produced them.
+        if (providers.environmentVariable("CI").isPresent) {
+            nativeJarsByClassifier.values.forEach { artifact(it) }
+        }
     }
 }
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+    // Signing is required for Maven Central, but should not block local development.
+    if (providers.environmentVariable("CI").isPresent) {
+        signAllPublications()
+    }
 }

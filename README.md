@@ -25,19 +25,19 @@ repositories {
 
 val linesweeperVersion = "1.0.0"
 val linesweeperTarget = run {
-    val osName = System.getProperty("os.name").lowercase()
-    val archName = System.getProperty("os.arch").lowercase()
+    val os = System.getProperty("os.name").lowercase()
+    val arch = System.getProperty("os.arch").lowercase()
 
-    val os = when {
-        "mac" in osName || "darwin" in osName -> "macos"
-        "windows" in osName -> "windows"
+    val osPart = when {
+        "mac" in os || "darwin" in os -> "macos"
+        "windows" in os -> "windows"
         else -> "linux"
     }
-    val arch = when (archName) {
+    val archPart = when (arch) {
         "aarch64", "arm64" -> "arm64"
         else -> "x64"
     }
-    "$os-$arch"
+    "$osPart-$archPart"
 }
 
 dependencies {
