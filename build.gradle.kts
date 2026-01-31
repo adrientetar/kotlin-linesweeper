@@ -15,7 +15,6 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(11)
     sourceSets {
         main {
             kotlin.srcDirs("bindings")
