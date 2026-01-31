@@ -60,7 +60,7 @@ jobs:
           retention-days: 1
 
   build-kotlin:
-    runs-on: macos-15
+    runs-on: macos-latest
     needs: []  # Build Kotlin bindings in parallel, doesn't need native libs
 
     steps:
