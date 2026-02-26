@@ -109,5 +109,5 @@ cargo test
 ./gradlew test
 ```
 
-[UniFFI]: https://mozilla.github.io/uniffi-rs/
+[UniFFI]: https://github.com/mozilla/uniffi-rs
 [linesweeper]: https://github.com/jneem/linesweeper
