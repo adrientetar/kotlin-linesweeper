@@ -298,7 +298,7 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 [[package]]
 name = "linesweeper"
 version = "0.2.0"
-source = "git+https://iris.radicle.xyz/rad:z2jbcL8tV3Fqqqk1yPyGkDTjgaTfH.git?rev=f68d1825a236520269465568fe8a905ea079181a#f68d1825a236520269465568fe8a905ea079181a"
+source = "git+https://iris.radicle.xyz/rad%3Az2jbcL8tV3Fqqqk1yPyGkDTjgaTfH.git?rev=f68d1825a236520269465568fe8a905ea079181a#f68d1825a236520269465568fe8a905ea079181a"
 dependencies = [
  "arrayvec",
  "kurbo",

@@ -16,7 +16,7 @@ path = "uniffi-bindgen.rs"
 
 [dependencies]
 uniffi = { version = "0.31.0", features = ["cli"] }
-linesweeper = { git = "https://iris.radicle.xyz/rad:z2jbcL8tV3Fqqqk1yPyGkDTjgaTfH.git", rev = "f68d1825a236520269465568fe8a905ea079181a" }
+linesweeper = { git = "https://iris.radicle.xyz/rad%3Az2jbcL8tV3Fqqqk1yPyGkDTjgaTfH.git", rev = "f68d1825a236520269465568fe8a905ea079181a" }
 kurbo = "0.12"
 thiserror = "1.0"
 
